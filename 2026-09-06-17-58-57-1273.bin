@@ -1,0 +1,11 @@
+{
+  "name": "Medicamento do Jeferson",
+  "short_name": "Remédios Jeferson",
+  "description": "Lembretes e registro dos medicamentos do Jeferson.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F5EFE1",
+  "theme_color": "#1F4E5F",
+  "lang": "pt-BR",
+  "icons": []
+}
