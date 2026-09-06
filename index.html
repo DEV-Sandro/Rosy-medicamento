@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Medicamento do Jeferson</title>
+<link rel="icon" href="data:,">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1F4E5F">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+  :root {
+    --ink:#1C2B2A; --river:#1F4E5F; --river-light:#3D7385;
+    --sand:#F5EFE1; --sand-deep:#EBE1CB;
+    --leaf:#5C8A54; --leaf-light:#8CB682;
+    --marigold:#C98A2E; --clay:#C1502E; --white:#FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--sand); }
+  body { font-family: 'Inter', sans-serif; color: var(--ink); }
+  button, input { font-family: inherit; }
+  button { cursor: pointer; }
+
+  .container { max-width: 480px; margin: 0 auto; min-height: 100vh; background: var(--sand); display: flex; flex-direction: column; }
+  .scroll-area { flex: 1; padding: 18px 18px 8px; padding-bottom: 100px; }
+
+  .loading-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .loading-pulse { width: 40px; height: 40px; border-radius: 50%; background: var(--leaf); opacity: .6; animation: pulseRing 1.5s infinite; }
+  .loading-screen p { font-family: 'Inter', sans-serif; color: #6b7a76; margin-top: 16px; }
+
+  @keyframes pulseRing { 0% { box-shadow: 0 0 0 0 rgba(193,80,46,.45);} 70% { box-shadow: 0 0 0 10px rgba(193,80,46,0);} 100% { box-shadow: 0 0 0 0 rgba(193,80,46,0);} }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
+  @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-3px);} 75%{transform:translateX(3px);} }
+
+  .header { background: linear-gradient(135deg, var(--river) 0%, var(--river-light) 100%); padding: 22px 20px 26px; color: var(--white); }
+  .header-row { display: flex; justify-content: space-between; align-items: flex-start; }
+  .eyebrow { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; opacity: .75; font-weight: 600; }
+  .header-title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 600; margin-top: 2px; }
+  .header-date { font-size: 12.5px; opacity: .8; margin-top: 3px; text-transform: capitalize; }
+  .user-pill { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); border-radius: 999px; padding: 7px 12px; color: var(--white); font-size: 13px; font-weight: 500; }
+
+  .icon { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: inline-block; vertical-align: middle; }
+
+  .hero-card { background: var(--white); border-radius: 20px; padding: 20px; box-shadow: 0 1px 3px rgba(28,43,42,.06), 0 8px 24px rgba(28,43,42,.06); margin-bottom: 22px; animation: fadeUp .4s ease; }
+  .hero-label { font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: #8a9793; font-weight: 700; margin-bottom: 10px; }
+  .hero-row { display: flex; align-items: center; gap: 14px; }
+  .hero-time { width: 54px; height: 54px; border-radius: 16px; background: var(--sand); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; color: var(--river); flex-shrink: 0; }
+  .hero-name { font-family: 'Fraunces', serif; font-size: 19px; font-weight: 600; }
+  .hero-sub { font-size: 13px; color: #7a8884; }
+  .btn-dado { background: var(--leaf); color: var(--white); border: none; border-radius: 12px; padding: 10px 14px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .btn-dado.alert { animation: shake 0.3s ease; }
+  .hero-done { background: var(--white); border-radius: 20px; padding: 24px; text-align: center; margin-bottom: 22px; }
+  .hero-done .title { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; margin-top: 6px; }
+  .hero-done .sub { font-size: 13px; color: #7a8884; margin-top: 2px; }
+
+  .section-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .section-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; }
+  .section-count { font-size: 12.5px; color: #7a8884; font-family: 'IBM Plex Mono', monospace; }
+
+  .timeline { position: relative; padding-left: 6px; }
+  .timeline-inner { position: relative; }
+  .vine-line { position: absolute; left: 15px; top: 6px; bottom: 6px; width: 2px; border-radius: 2px; background: linear-gradient(to bottom, var(--leaf), var(--sand-deep) 85%); }
+  .dose-row { display: flex; gap: 14px; margin-bottom: 14px; position: relative; }
+  .dose-node { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; z-index: 1; background: var(--white); border: 2.5px solid var(--sand-deep); }
+  .dose-node.done { background: var(--leaf); border-color: var(--leaf); }
+  .dose-node.overdue { border-color: var(--clay); animation: pulseRing 1.6s infinite; }
+  .dose-node.due { border-color: var(--marigold); }
+  .dose-card { flex: 1; text-align: left; background: var(--white); border: none; border-radius: 14px; padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; }
+  .dose-card.done { opacity: .72; }
+  .dose-med { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .dose-med.done { text-decoration: line-through; }
+  .dose-med span { font-weight: 400; color: #8a9793; }
+  .dose-meta { font-size: 12px; color: #8a9793; margin-top: 1px; }
+
+  .alarm-card { background: linear-gradient(135deg, var(--clay) 0%, #A63D22 100%); border-radius: 16px; padding: 16px; margin-top: 22px; display: flex; align-items: center; gap: 12px; color: var(--white); }
+  .alarm-icon { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .alarm-title { font-size: 13.5px; font-weight: 600; }
+  .alarm-sub { font-size: 11.5px; opacity: .85; line-height: 1.4; margin-top: 1px; }
+  .btn-alarme-on { background: rgba(255,255,255,.25); color: var(--white); border: none; border-radius: 10px; padding: 8px 12px; font-size: 12.5px; font-weight: 600; flex-shrink: 0; }
+
+  .activity-block { margin-top: 22px; }
+  .activity-head { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+  .activity-label { font-size: 12px; letter-spacing: .5px; text-transform: uppercase; color: #8a9793; font-weight: 700; }
+  .activity-item { font-size: 12.5px; color: #5c6863; display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .activity-item .when { color: #9aa6a2; }
+
+  .screen-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .screen-sub { font-size: 12.5px; color: #8a9793; margin-bottom: 18px; }
+  .med-card { background: var(--white); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+  .med-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .med-name { font-family: 'Fraunces', serif; font-size: 16.5px; font-weight: 600; }
+  .med-sub { font-size: 12.5px; color: #7a8884; margin-top: 1px; }
+  .badge { font-size: 10.5px; font-weight: 700; border-radius: 999px; padding: 4px 9px; white-space: nowrap; }
+  .badge.dias { color: var(--clay); background: #F8E7DE; }
+  .med-info { font-size: 12px; color: #5c6863; background: var(--sand); border-radius: 10px; padding: 8px 10px; margin-top: 10px; line-height: 1.4; }
+
+  .nav { position: sticky; bottom: 0; left: 0; right: 0; background: rgba(245,239,225,.92); backdrop-filter: blur(8px); border-top: 1px solid var(--sand-deep); display: flex; max-width: 480px; margin: 0 auto; width: 100%; }
+  .nav-btn { flex: 1; background: none; border: none; padding: 11px 0 13px; display: flex; flex-direction: column; align-items: center; gap: 3px; color: #9aa6a2; }
+  .nav-btn.active { color: var(--river); }
+  .nav-btn .icon { width: 19px; height: 19px; }
+  .nav-btn span { font-size: 10.5px; font-weight: 500; }
+  .nav-btn.active span { font-weight: 700; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(28,43,42,.45); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 20px; }
+  .modal-box { background: var(--white); border-radius: 20px; padding: 24px; max-width: 340px; width: 100%; position: relative; }
+  .modal-close { position: absolute; top: 14px; right: 14px; background: none; border: none; color: #9aa6a2; }
+  .modal-title { font-family: 'Fraunces', serif; font-size: 19px; font-weight: 600; margin-bottom: 6px; }
+  .modal-sub { font-size: 12.5px; color: #7a8884; margin-bottom: 16px; line-height: 1.4; }
+  .modal-input { width: 100%; border: 1.5px solid var(--sand-deep); border-radius: 12px; padding: 11px 14px; font-size: 15px; margin-bottom: 14px; font-family: 'Inter', sans-serif; }
+  .modal-btn { width: 100%; background: var(--river); color: var(--white); border: none; border-radius: 12px; padding: 12px 0; font-size: 14.5px; font-weight: 600; }
+
+  .setup-notice { margin: 40px 20px; background: var(--white); border-radius: 16px; padding: 20px; font-size: 13.5px; line-height: 1.6; }
+  .setup-notice code { background: var(--sand); padding: 1px 5px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div id="app-root">
+      <div class="loading-screen"><div class="loading-pulse"></div><p>carregando...</p></div>
+    </div>
+  </div>
+  <div id="modal-root"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "COLE_AQUI_SUA_API_KEY",
+  authDomain: "COLE_AQUI.firebaseapp.com",
+  projectId: "COLE_AQUI_O_PROJECT_ID",
+  storageBucket: "COLE_AQUI.appspot.com",
+  messagingSenderId: "COLE_AQUI",
+  appId: "COLE_AQUI_O_APP_ID"
+};
+
+const NAO_CONFIGURADO = firebaseConfig.apiKey === "COLE_AQUI_SUA_API_KEY";
+
+/* =========================================================
+   Medicamentos do Jeferson — receita (data não visível na foto)
+========================================================= */
+const BASE_MEDS = [
+  { id: 'cefadroxila', nome: 'Cefadroxila', dose: '500 mg', freq: 'a cada 12 horas', via: 'Oral',
+    horariosPadrao: ['08:00', '20:00'], obs: 'Tomar 01 comprimido de 12/12 horas por 7 dias', duracao: 'determinado', inicio: '2026-07-13', totalDias: 7, estoqueInicial: 14 },
+  { id: 'tormiv', nome: 'Tormiv', dose: '10 mg', freq: 'a cada 8 horas', via: 'Oral',
+    horariosPadrao: ['08:00', '16:00', '00:00'], obs: 'Tomar 01 comprimido de 8/8 horas por 7 dias', duracao: 'determinado', inicio: '2026-07-13', totalDias: 7, estoqueInicial: 21 },
+  { id: 'altiva', nome: 'Altiva', dose: '120 mg', freq: '1x ao dia', via: 'Oral',
+    horariosPadrao: ['08:00'], obs: 'Tomar 01 comprimido ao dia se tiver alergia', duracao: 'conforme necessário', estoqueInicial: null, estoqueTexto: '1 caixa' },
+];
+
+const fmtDate = (d) => { const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; };
+const fmtDiaSemana = (s) => { const [y,m,d]=s.split('-').map(Number); const dias=['dom','seg','ter','qua','qui','sex','sáb']; return dias[new Date(y,m-1,d).getDay()]; };
+const fmtDiaMes = (s) => { const [,m,d]=s.split('-'); return `${d}/${m}`; };
+const timeToMinutes = (t) => { const [h,m]=t.split(':').map(Number); return h*60+m; };
+const diffDaysFromStart = (startStr, todayStr) => {
+  const [sy,sm,sd]=startStr.split('-').map(Number), [ty,tm,td]=todayStr.split('-').map(Number);
+  return Math.round((new Date(ty,tm-1,td) - new Date(sy,sm-1,sd)) / 86400000);
+};
+const esc = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const ICONS = {
+  check: '<polyline points="20 6 9 17 4 12"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/>',
+  alert: '<circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12.5"/><line x1="12" y1="16" x2="12" y2="16.2"/>',
+  bell: '<path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>',
+  home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
+  pill: '<rect x="4" y="9" width="16" height="6" rx="3" transform="rotate(-45 12 12)"/><line x1="12" y1="7.5" x2="12" y2="16.5" transform="rotate(-45 12 12)"/>',
+  history: '<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/><path d="M3 3v6h6"/>',
+  chevron: '<polyline points="9 6 15 12 9 18"/>',
+  x: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  activity: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+};
+const icon = (name, extra='') => `<svg class="icon ${extra}" viewBox="0 0 24 24">${ICONS[name]}</svg>`;
+
+const S = {
+  view: 'hoje',
+  now: new Date(),
+  username: localStorage.getItem('jeferson-cuidador') || null,
+  config: {},
+  logs: {},
+  estoque: {},
+  loadedConfig: false, loadedLogs: false, loadedEstoque: false,
+  alarmeOn: localStorage.getItem('jeferson-alarme') === '1',
+  notifStatus: (window.Notification && Notification.permission) || 'default',
+};
+const notified = new Set();
+let audioContext = null;
+let alarmTimer = null;
+let alarmStopTimer = null;
+
+function saveAlarmState(on) {
+  S.alarmeOn = on;
+  localStorage.setItem('jeferson-alarme', on ? '1' : '0');
+}
+
+function ensureAudio() {
+  try {
+    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioContext.state === 'suspended') audioContext.resume();
+    return true;
+  } catch (e) { return false; }
+}
+
+function beep(duration = 0.65, frequency = 820) {
+  try {
+    if (!ensureAudio()) return;
+    const now = audioContext.currentTime;
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(frequency, now);
+    osc.frequency.exponentialRampToValueAtTime(520, now + duration);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.28, now + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    osc.connect(gain); gain.connect(audioContext.destination);
+    osc.start(now); osc.stop(now + duration + 0.02);
+  } catch (e) {}
+}
+
+function playAlarmSound() {
+  // Sequência curta e mais perceptível, repetida pelo alarme durante 30s.
+  [0, 0.35, 0.7].forEach((delay, i) => setTimeout(() => beep(0.22, i === 1 ? 980 : 820), delay * 1000));
+}
+
+function showDoseNotification(dose) {
+  try {
+    if (Notification.permission !== 'granted') return;
+    const n = new Notification('Hora do medicamento do Jeferson', {
+      body: `${dose.med.nome} ${dose.med.dose} — ${dose.horario}`,
+      tag: `jeferson-med-${dose.key}-${fmtDate(new Date())}`,
+      requireInteraction: true
+    });
+    n.onclick = () => { window.focus(); n.close(); };
+  } catch (e) {}
+}
+
+function triggerDoseAlarm(dose, today) {
+  const key = `${dose.key}__${today}`;
+  if (notified.has(key) || dose.feito) return;
+  notified.add(key);
+  playAlarmSound();
+  showDoseNotification(dose);
+  if ('vibrate' in navigator) navigator.vibrate([500, 200, 500, 200, 700]);
+  clearTimeout(alarmStopTimer);
+  // Reforça o aviso algumas vezes enquanto a página estiver ativa.
+  let elapsed = 0;
+  const repeat = () => {
+    elapsed += 4000;
+    if (elapsed >= 30000) return;
+    if (!dose.feito && S.alarmeOn) { playAlarmSound(); setTimeout(repeat, 4000); }
+  };
+  setTimeout(repeat, 4000);
+}
+
+function checkAlarms() {
+  if (!S.alarmeOn || !isLoaded()) return;
+  const now = new Date();
+  const today = fmtDate(now);
+  const doses = buildDosesHoje(getMeds(), today);
+  const minute = now.getHours() * 60 + now.getMinutes();
+  doses.forEach(d => { if (timeToMinutes(d.horario) === minute) triggerDoseAlarm(d, today); });
+}
+
+function scheduleAlarmCheck() {
+  clearTimeout(alarmTimer);
+  if (!S.alarmeOn) return;
+  const now = new Date();
+  const delay = (60 - now.getSeconds()) * 1000 - now.getMilliseconds() + 250;
+  alarmTimer = setTimeout(() => { checkAlarms(); scheduleAlarmCheck(); }, Math.max(250, delay));
+}
+
+
+const isLoaded = () => S.loadedConfig && S.loadedLogs && S.loadedEstoque;
+
+function getMeds() {
+  return BASE_MEDS.map(m => ({ ...m, horarios: (S.config[m.id] && S.config[m.id].length) ? S.config[m.id] : m.horariosPadrao }));
+}
+
+function buildDosesHoje(meds, today) {
+  const doses = [];
+  meds.forEach(m => {
+    if (m.duracao === 'determinado') {
+      const passados = diffDaysFromStart(m.inicio, today);
+      if (passados >= m.totalDias) return;
+    }
+    m.horarios.forEach(h => {
+      const key = `${m.id}__${h}`;
+      doses.push({ med: m, horario: h, key, feito: S.logs[today] && S.logs[today][key] });
+    });
+  });
+  doses.sort((a, b) => timeToMinutes(a.horario) - timeToMinutes(b.horario));
+  return doses;
+}
+
+function statusOf(dose, nowMinutes) {
+  if (dose.feito) return 'done';
+  const dm = timeToMinutes(dose.horario);
+  if (nowMinutes >= dm + 60) return 'overdue';
+  if (nowMinutes >= dm) return 'due';
+  return 'upcoming';
+}
+
+const root = document.getElementById('app-root');
+const modalRoot = document.getElementById('modal-root');
+
+function renderApp() {
+  if (NAO_CONFIGURADO) {
+    root.innerHTML = `<div class="setup-notice"><strong>Falta configurar o Firebase.</strong><br><br>Abra <code>index.html</code>, encontre <code>firebaseConfig</code> no script, e cole as chaves do seu projeto Firebase. Veja o <code>README.md</code>.</div>`;
+    return;
+  }
+  if (!isLoaded()) {
+    root.innerHTML = `<div class="loading-screen"><div class="loading-pulse"></div><p>carregando...</p></div>`;
+    return;
+  }
+
+  const today = fmtDate(S.now);
+  const meds = getMeds();
+  const dosesHoje = buildDosesHoje(meds, today);
+
+  root.innerHTML = `
+    ${headerHTML(today)}
+    <div class="scroll-area">
+      ${ S.view === 'hoje' ? telaHojeHTML(meds, dosesHoje, today)
+        : S.view === 'medicamentos' ? telaMedicamentosHTML(meds, today)
+        : telaHistoricoHTML(meds, today) }
+    </div>
+    ${navHTML()}
+  `;
+
+  if (!S.username && !document.getElementById('modal-box-name')) openNameModal(false);
+}
+
+function headerHTML(today) {
+  const dataFmt = S.now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+  return `
+  <div class="header">
+    <div class="header-row">
+      <div>
+        <div class="eyebrow">administrando a</div>
+        <div class="header-title">Jeferson</div>
+        <div class="header-date">${dataFmt}</div>
+      </div>
+      <button class="user-pill" data-action="open-name-modal">${icon('user')} ${esc(S.username || 'quem é você?')}</button>
+    </div>
+  </div>`;
+}
+
+function navHTML() {
+  const items = [ ['hoje','home','Hoje'], ['medicamentos','pill','Medicamentos'], ['historico','history','Histórico'] ];
+  return `<div class="nav">${items.map(([id, ic, label]) => `
+    <button class="nav-btn ${S.view===id?'active':''}" data-action="set-view" data-view="${id}">
+      ${icon(ic)}<span>${label}</span>
+    </button>`).join('')}</div>`;
+}
+
+function telaHojeHTML(meds, dosesHoje, today) {
+  const now = S.now;
+  const nowMinutes = now.getHours()*60 + now.getMinutes();
+  const proxima = dosesHoje.find(d => !d.feito && statusOf(d, nowMinutes) !== 'overdue') || dosesHoje.find(d => !d.feito);
+  const total = dosesHoje.length, feitas = dosesHoje.filter(d => d.feito).length;
+
+  const heroHTML = proxima ? `
+    <div class="hero-card">
+      <div class="hero-label">próxima dose</div>
+      <div class="hero-row">
+        <div class="hero-time">${proxima.horario}</div>
+        <div style="flex:1; min-width:0;">
+          <div class="hero-name">${esc(proxima.med.nome)}</div>
+          <div class="hero-sub">${esc(proxima.med.dose)} · ${esc(proxima.med.freq)}</div>
+        </div>
+        <button class="btn-dado" data-action="marcar-dado" data-med="${proxima.med.id}" data-horario="${proxima.horario}">${icon('check')} dado</button>
+      </div>
+    </div>` : `
+    <div class="hero-done">
+      ${icon('check')}
+      <div class="title">Tudo em dia</div>
+      <div class="sub">Todas as doses de hoje foram administradas.</div>
+    </div>`;
+
+  const rows = dosesHoje.map(d => {
+    const st = statusOf(d, nowMinutes);
+    return `
+    <div class="dose-row">
+      <div class="dose-node ${st}">${st==='done' ? icon('check') : st==='overdue' ? icon('alert') : ''}</div>
+      <button class="dose-card ${d.feito?'done':''}" data-action="marcar-dado" data-med="${d.med.id}" data-horario="${d.horario}">
+        <div style="min-width:0;">
+          <div class="dose-med ${d.feito?'done':''}">${esc(d.med.nome)} <span>${esc(d.med.dose)}</span></div>
+          <div class="dose-meta">${d.horario} ${d.feito ? '· registrado' : st==='overdue' ? '· atrasado' : ''}</div>
+        </div>
+        ${icon('chevron', '')}
+      </button>
+    </div>`;
+  }).join('');
+
+  const atividade = [];
+  Object.keys(S.logs).sort().reverse().slice(0,2).forEach(date => {
+    Object.entries(S.logs[date]||{}).forEach(([key, info]) => {
+      const [medId, horario] = key.split('__');
+      const med = BASE_MEDS.find(m => m.id === medId);
+      if (med) atividade.push({ medNome: med.nome, horario, ...info });
+    });
+  });
+  atividade.sort((a,b) => new Date(b.em) - new Date(a.em));
+
+  const alarmeSub = S.alarmeOn
+    ? 'Alarme ativo — você vai ouvir um som quando chegar a hora de cada dose.'
+    : (S.notifStatus === 'denied' ? 'Notificações bloqueadas (permissões do navegador).' : 'Ative pra receber alarme sonoro na hora de cada medicamento.');
+
+  return `
+    ${heroHTML}
+    <div class="section-row">
+      <div class="section-title">Linha do dia</div>
+      <div class="section-count">${feitas}/${total}</div>
+    </div>
+    <div class="timeline"><div class="timeline-inner">
+      <div class="vine-line"></div>
+      ${rows}
+    </div></div>
+    <div class="alarm-card">
+      ${icon('bell')}
+      <div style="flex:1;">
+        <div class="alarm-title">Alarme sonoro</div>
+        <div class="alarm-sub">${alarmeSub}</div>
+      </div>
+      ${(!S.alarmeOn && S.notifStatus !== 'denied') ? `<button class="btn-alarme-on" data-action="ativar-alarme">ativar</button>` : ''}
+    </div>
+    ${atividade.length ? `
+    <div class="activity-block">
+      <div class="activity-head">${icon('activity')}<div class="activity-label">registro</div></div>
+      ${atividade.slice(0,6).map(a => `
+        <div class="activity-item">
+          <strong>${esc(a.por)}</strong> administrou ${esc(a.medNome)} (${a.horario}) · <span class="when">${new Date(a.em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>
+        </div>`).join('')}
+    </div>` : ''}
+  `;
+}
+
+function telaMedicamentosHTML(meds, today) {
+  return `
+    <div class="screen-title">Medicamentos do Jeferson</div>
+    <div class="screen-sub">Tratamento em andamento</div>
+    ${meds.map(m => {
+      const est = S.estoque[m.id];
+      const baixo = est != null && est <= 3;
+      let diasRestantes = null;
+      if (m.duracao === 'determinado') diasRestantes = Math.max(0, m.totalDias - diffDaysFromStart(m.inicio, today));
+      return `
+      <div class="med-card">
+        <div class="med-head">
+          <div>
+            <div class="med-name">${esc(m.nome)}</div>
+            <div class="med-sub">${esc(m.dose)} · ${esc(m.freq)} · ${esc(m.via)}</div>
+          </div>
+          ${m.duracao === 'determinado'
+            ? `<span class="badge dias">${diasRestantes} ${diasRestantes===1?'dia':'dias'}</span>`
+            : `<span class="badge dias" style="color:var(--leaf); background:#E9F1E6;">conforme necessário</span>`}
+        </div>
+        ${m.obs ? `<div class="med-info">${esc(m.obs)}</div>` : ''}
+        <div style="border-top: 1px solid var(--sand); margin-top: 12px; padding-top: 10px; font-size: 12px; color: #7a8884;">
+          ${est != null
+            ? `estoque: <strong class="${baixo?'low':''}" style="color:${baixo?'var(--clay)':'var(--ink)'}">${est} comprimidos</strong>${baixo?' · acabando':''}`
+            : `estoque: ${esc(m.estoqueTexto)} <span style="color:#b3bcb8;">(sem contagem)</span>`}
+        </div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+function telaHistoricoHTML(meds, hoje) {
+  const dias = [];
+  for (let i = 6; i >= 0; i--) { const d = new Date(S.now); d.setDate(d.getDate()-i); dias.push(fmtDate(d)); }
+  const totalDosesPorDia = meds.reduce((acc, m) => {
+    if (m.duracao === 'determinado') return acc;
+    return acc + m.horarios.length;
+  }, 0);
+
+  const bars = dias.map(d => {
+    const dayLog = S.logs[d] || {};
+    const feitas = Object.keys(dayLog).length;
+    const pct = totalDosesPorDia ? feitas/totalDosesPorDia : 0;
+    const cor = pct >= 1 ? 'var(--leaf)' : pct > 0 ? 'var(--marigold)' : 'var(--sand-deep)';
+    return `
+    <div style="flex:1; text-align:center;">
+      <div style="height:64px; border-radius:12px; background:var(--white); display:flex; align-items:flex-end; overflow:hidden; border:1.5px solid ${d===hoje?'var(--river)':'transparent'};"><div style="width:100%; height:${Math.max(6,pct*100)}%; background:${cor}; transition:height .3s;"></div></div>
+      <div style="font-size:10.5px; color:#8a9793; margin-top:5px; text-transform:capitalize;">${fmtDiaSemana(d)}</div>
+      <div style="font-size:10px; font-family:'IBM Plex Mono',monospace; color:#b3bcb8;">${fmtDiaMes(d)}</div>
+    </div>`;
+  }).join('');
+
+  const blocks = [...dias].reverse().map(d => {
+    const dayLog = S.logs[d] || {};
+    const entries = Object.entries(dayLog).sort((a,b) => new Date(a[1].em) - new Date(b[1].em));
+    return `
+    <div style="margin-bottom:16px;">
+      <div style="font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:6px; text-transform:capitalize;">${fmtDiaSemana(d)}, ${fmtDiaMes(d)} ${d===hoje ? '<span style="color:var(--leaf);">· hoje</span>' : ''}</div>
+      ${entries.length === 0 ? `<div style="font-size:12px; color:#b3bcb8;">nenhum registro</div>` : entries.map(([key, info]) => {
+        const [medId, horario] = key.split('__');
+        const med = meds.find(m => m.id === medId);
+        if (!med) return '';
+        return `<div style="display:flex; align-items:center; gap:8px; font-size:12.5px; background:var(--white); border-radius:10px; padding:7px 10px; margin-bottom:5px;">${icon('check')}<span style="font-weight:600;">${esc(med.nome)}</span><span>${horario}</span><span style="margin-left:auto; color:#8a9793;">${esc(info.por)}</span></div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="screen-title">Últimos 7 dias</div>
+    <div class="screen-sub">Adesão ao tratamento</div>
+    <div style="display:flex; gap:8px; margin-bottom:22px;">${bars}</div>
+    <div style="font-size:12px; letter-spacing:.5px; text-transform:uppercase; color:#8a9793; font-weight:700; margin-bottom:10px;">histórico</div>
+    ${blocks}
+  `;
+}
+
+function openNameModal(canClose) {
+  modalRoot.innerHTML = `
+    <div class="modal-overlay">
+      <div class="modal-box" id="modal-box-name">
+        ${canClose ? `<button class="modal-close" data-action="close-name-modal">${icon('x')}</button>` : ''}
+        <div class="modal-title">Quem está administrando?</div>
+        <div class="modal-sub">Assim a gente sabe quem deu cada dose. Só precisa dizer uma vez neste aparelho.</div>
+        <input id="name-input" class="modal-input" placeholder="seu nome" value="${esc(S.username||'')}" autofocus>
+        <button class="modal-btn" data-action="save-name">continuar</button>
+      </div>
+    </div>`;
+  setTimeout(() => document.getElementById('name-input')?.focus(), 30);
+}
+function closeNameModal() { if (S.username) modalRoot.innerHTML = ''; }
+function saveNameFromModal() {
+  const val = (document.getElementById('name-input').value || '').trim();
+  if (!val) return;
+  S.username = val;
+  localStorage.setItem('jeferson-cuidador', val);
+  modalRoot.innerHTML = '';
+  renderApp();
+}
+
+async function marcarDado(medId, horario) {
+  if (!S.username) { openNameModal(true); return; }
+  const today = fmtDate(S.now);
+  const key = `${medId}__${horario}`;
+  const dayLog = { ...(S.logs[today] || {}) };
+  const nextLogs = { ...S.logs };
+
+  if (dayLog[key]) {
+    delete dayLog[key];
+    nextLogs[today] = dayLog;
+  } else {
+    dayLog[key] = { por: S.username, em: new Date().toISOString() };
+    nextLogs[today] = dayLog;
+    const dates = Object.keys(nextLogs).sort();
+    if (dates.length > 60) dates.slice(0, dates.length - 60).forEach(d => delete nextLogs[d]);
+  }
+  S.logs = nextLogs;
+  renderApp();
+  await setDoc(doc(db, 'jeferson', 'logs'), nextLogs);
+}
+
+async function ativarAlarme() {
+  if (!('Notification' in window)) { alert('Este navegador não suporta notificações.'); return; }
+  try {
+    ensureAudio();
+    const perm = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+    S.notifStatus = perm;
+    if (perm === 'granted') {
+      saveAlarmState(true);
+      // Teste imediato: confirma que o som/notificação está funcionando.
+      beep(0.18, 900);
+      new Notification('Alarme ativado', { body: 'Os lembretes do Jeferson estão ativos neste aparelho.', tag: 'jeferson-alarm-test' });
+      scheduleAlarmCheck();
+    } else {
+      saveAlarmState(false);
+    }
+  } catch (e) { saveAlarmState(false); }
+  renderApp();
+}
+
+function desativarAlarme() {
+  saveAlarmState(false);
+  clearTimeout(alarmTimer);
+  renderApp();
+}
+
+// Se o aparelho voltar para a página após ficar em segundo plano, verifica imediatamente.
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) { checkAlarms(); scheduleAlarmCheck(); }
+});
+window.addEventListener('pageshow', () => { checkAlarms(); scheduleAlarmCheck(); });
+
+setInterval(() => { S.now = new Date(); renderApp(); checkAlarms(); }, 20000);
+
+// Registra o Service Worker para permitir instalação como PWA.
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
+
+if (S.alarmeOn) scheduleAlarmCheck();
+
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const a = el.dataset.action;
+  if (a === 'set-view') { S.view = el.dataset.view; renderApp(); }
+  else if (a === 'marcar-dado') marcarDado(el.dataset.med, el.dataset.horario);
+  else if (a === 'open-name-modal') openNameModal(true);
+  else if (a === 'close-name-modal') closeNameModal();
+  else if (a === 'save-name') saveNameFromModal();
+  else if (a === 'ativar-alarme') ativarAlarme();
+  else if (a === 'desativar-alarme') desativarAlarme();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target && e.target.id === 'name-input') saveNameFromModal();
+});
+
+let db;
+if (!NAO_CONFIGURADO) {
+  const app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+
+  onSnapshot(doc(db, 'jeferson', 'config'), snap => { S.config = snap.exists() ? snap.data() : {}; S.loadedConfig = true; renderApp(); },
+    err => { S.loadedConfig = true; renderApp(); console.error(err); });
+
+  onSnapshot(doc(db, 'jeferson', 'logs'), snap => { S.logs = snap.exists() ? snap.data() : {}; S.loadedLogs = true; renderApp(); },
+    err => { S.loadedLogs = true; renderApp(); console.error(err); });
+
+  onSnapshot(doc(db, 'jeferson', 'estoque'), async snap => {
+    if (snap.exists()) { S.estoque = snap.data(); }
+    else {
+      const init = {}; BASE_MEDS.forEach(m => { if (m.estoqueInicial != null) init[m.id] = m.estoqueInicial; });
+      S.estoque = init;
+      await setDoc(doc(db, 'jeferson', 'estoque'), init);
+    }
+    S.loadedEstoque = true; renderApp();
+  }, err => { S.loadedEstoque = true; renderApp(); console.error(err); });
+} else {
+  renderApp();
+}
+</script>
+</body>
+</html>
